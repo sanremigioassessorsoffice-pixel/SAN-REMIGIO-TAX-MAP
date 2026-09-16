@@ -87,11 +87,21 @@
     </head>
     <body>
         <div id="coverScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: url('images/cover.png') no-repeat center center; background-size: cover; display: flex; align-items: center; justify-content: center;">
-        <button id="startBtn" style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, 20px); overflow: hidden; background: #0c2350; color: #f4d47c; border: none; padding: 16px 48px; border-radius: 999px; font-size: 17px; font-weight: 700; font-family: Arial, sans-serif; cursor: pointer; opacity: 0; letter-spacing: 0.5px;">
+>           <button id="startBtn" style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, 20px); overflow: hidden; background: #0c2350; color: #f4d47c; border: none; padding: 16px 48px; border-radius: 999px; font-size: 17px; font-weight: 700; font-family: Arial, sans-serif; cursor: pointer; opacity: 0; letter-spacing: 0.5px;">
             <span style="position: relative; z-index: 2;">Let's get started</span>
             <span id="shimmer" style="position: absolute; top: 0; left: -60%; width: 40%; height: 100%; background: linear-gradient(90deg, transparent, rgba(244,212,124,0.35), transparent); z-index: 1;"></span>
         </button>
         </div>
+        <div id="passwordModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; align-items: center; justify-content: center;">
+        <div id="modalBackdrop" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); background: rgba(12,35,80,0.3);"></div>
+        <div style="position: relative; background: #fff; padding: 32px 40px; border-radius: 16px; text-align: center; font-family: 'Space Grotesk', sans-serif; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <p style="margin: 0 0 16px; color: #0c2350; font-weight: 500;">Enter password to continue</p>
+            <input type="password" id="sitePassword" style="padding: 10px 16px; border-radius: 999px; border: 2px solid #0c2350; font-family: 'Space Grotesk', sans-serif; font-size: 14px; text-align: center; width: 220px;">
+            <br>
+            <button id="submitPassword" style="margin-top: 16px; background: #0c2350; color: #f4d47c; border: none; padding: 10px 32px; border-radius: 999px; font-weight: 700; cursor: pointer;">Enter</button>
+            <p id="passwordError" style="color: #c0392b; font-size: 12px; margin-top: 10px; display: none;">Incorrect password, try again.</p>
+        </div>
+    </div>
         <div id="mapHeader" style="position: fixed; top: 0; left: 0; width: 100%; height: 100px; background-image: url('images/header.png'); background-size: cover; background-repeat: no-repeat; background-position: center; z-index: 1000;"></div>
         <div id="map">
         </div>
@@ -630,13 +640,35 @@ map.on('overlayremove', function(e) {
             { duration: 2200, delay: 1500, iterations: Infinity, easing: 'ease-in-out' }
         );
 
+        var SITE_PASSWORD = 'sanremapa07'; // change this to whatever password you want
+        var passwordModal = document.getElementById('passwordModal');
+        var sitePasswordInput = document.getElementById('sitePassword');
+        var passwordError = document.getElementById('passwordError');
+
         startBtn.addEventListener('click', function() {
+            passwordModal.style.display = 'flex';
+            setTimeout(function() { sitePasswordInput.focus(); }, 50);
+        });
+
+        function trySubmitPassword() {
+            if (sitePasswordInput.value !== SITE_PASSWORD) {
+                passwordError.style.display = 'block';
+                return;
+            }
             coverScreen.style.transition = 'opacity 0.6s ease';
+            passwordModal.style.transition = 'opacity 0.6s ease';
             coverScreen.style.opacity = '0';
+            passwordModal.style.opacity = '0';
             setTimeout(function() {
                 coverScreen.style.display = 'none';
+                passwordModal.style.display = 'none';
                 map.invalidateSize();
             }, 600);
+        }
+
+        document.getElementById('submitPassword').addEventListener('click', trySubmitPassword);
+        sitePasswordInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') trySubmitPassword();
         });
         var LABEL_MIN_ZOOM = 50;
         
