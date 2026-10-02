@@ -14,6 +14,8 @@
         <link rel="stylesheet" href="css/leaflet-search.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <link rel="stylesheet" href="css/leaflet-measure.css">
+        <link rel="stylesheet" href="https://unpkg.com/mapillary-js@4/dist/mapillary.css">
+        <script src="https://unpkg.com/mapillary-js@4/dist/mapillary.js"></script>
         
         <style>
         
@@ -87,7 +89,7 @@
     </head>
     <body>
         <div id="coverScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; background: url('images/cover.png') no-repeat center center; background-size: cover; display: flex; align-items: center; justify-content: center;">
->           <button id="startBtn" style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, 20px); overflow: hidden; background: #0c2350; color: #f4d47c; border: none; padding: 16px 48px; border-radius: 999px; font-size: 17px; font-weight: 700; font-family: Arial, sans-serif; cursor: pointer; opacity: 0; letter-spacing: 0.5px;">
+        <button id="startBtn" style="position: absolute; top: 70%; left: 50%; transform: translate(-50%, 20px); overflow: hidden; background: #0c2350; color: #f4d47c; border: none; padding: 16px 48px; border-radius: 999px; font-size: 17px; font-weight: 700; font-family: Arial, sans-serif; cursor: pointer; opacity: 0; letter-spacing: 0.5px;">
             <span style="position: relative; z-index: 2;">Let's get started</span>
             <span id="shimmer" style="position: absolute; top: 0; left: -60%; width: 40%; height: 100%; background: linear-gradient(90deg, transparent, rgba(244,212,124,0.35), transparent); z-index: 1;"></span>
         </button>
@@ -101,6 +103,11 @@
             <button id="submitPassword" style="margin-top: 16px; background: #0c2350; color: #f4d47c; border: none; padding: 10px 32px; border-radius: 999px; font-weight: 700; cursor: pointer;">Enter</button>
             <p id="passwordError" style="color: #c0392b; font-size: 12px; margin-top: 10px; display: none;">Incorrect password, try again.</p>
         </div>
+    </div>
+        <div id="streetViewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10001; background: rgba(0,0,0,0.85);">
+        <button id="closeStreetView" style="position: absolute; top: 16px; right: 16px; z-index: 10002; background: #0c2350; color: #fff; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer;">Close</button>
+        <div id="mly" style="width: 100%; height: 100%;"></div>
+        <p id="noStreetView" style="display: none; color: #fff; text-align: center; margin-top: 20%; font-family: 'Space Grotesk', sans-serif;">No street-level imagery found near this location.</p>
     </div>
         <div id="mapHeader" style="position: fixed; top: 0; left: 0; width: 100%; height: 100px; background-image: url('images/header.png'); background-size: cover; background-repeat: no-repeat; background-position: center; z-index: 1000;"></div>
         <div id="map">
@@ -120,6 +127,11 @@
         <script src="js/leaflet-measure.js"></script>
         <script src="js/leaflet-search.js"></script>
         <script src="data/TAXMAP_3.js"></script>
+        <script src="data/CADASTRALMAP_0.js"></script>
+        <script src="data/TSPSLine2024_2.js"></script>
+        <script src="data/River_3.js"></script>
+        <script src="data/FloodAffectedAreas_4.js"></script>
+        <script src="data/LandslideAffectedAreas_5.js"></script>
         <script>
         var map = L.map('map', {
             zoomControl:false, maxZoom:28, minZoom:1
@@ -257,46 +269,51 @@
         });
         layer_GoogleHybrid_2;
         map.addLayer(layer_GoogleHybrid_2);
+
         function pop_TAXMAP_3(feature, layer) {
-            var popupContent = '<table>\
-                    <tr>\
-                        <td colspan="2"><strong>Owner</strong><br />' + (feature.properties['Owner'] !== null ? autolinker.link(String(feature.properties['Owner']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Lot_No</th>\
-                        <td>' + (feature.properties['Lot_No'] !== null ? autolinker.link(String(feature.properties['Lot_No']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">TD_Number</th>\
-                        <td class="visible-with-data" id="TD_Number">' + (feature.properties['TD_Number'] !== null ? autolinker.link(String(feature.properties['TD_Number']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Area</th>\
-                        <td>' + (feature.properties['Area'] !== null ? autolinker.link(String(feature.properties['Area']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Class</th>\
-                        <td>' + (feature.properties['Class'] !== null ? autolinker.link(String(feature.properties['Class']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Sub_Class</th>\
-                        <td>' + (feature.properties['Sub_Class'] !== null ? autolinker.link(String(feature.properties['Sub_Class']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Remarks</th>\
-                        <td class="visible-with-data" id="Remarks">' + (feature.properties['Remarks'] !== null ? autolinker.link(String(feature.properties['Remarks']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Barangay</th>\
-                        <td>' + (feature.properties['Barangay'] !== null ? autolinker.link(String(feature.properties['Barangay']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
+        var center = { lat: 0, lng: 0 };
+        try {
+            center = layer.getBounds().getCenter();
+        } catch (err) {}
+        var popupContent = '<table>\
+                <tr>\
+                    <td colspan="2"><strong>Owner</strong><br />' + (feature.properties['Owner'] !== null ? autolinker.link(String(feature.properties['Owner']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                </tr>\
+                <tr>\
+                    <th scope="row">Lot_No</th>\
+                    <td>' + (feature.properties['Lot_No'] !== null ? autolinker.link(String(feature.properties['Lot_No']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                </tr>\
+                <tr>\
+                    <th scope="row">TD_Number</th>\
+                    <td class="visible-with-data" id="TD_Number">' + (feature.properties['TD_Number'] !== null ? autolinker.link(String(feature.properties['TD_Number']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                </tr>\
+                <tr>\
+                    <th scope="row">Area</th>\
+                    <td>' + (feature.properties['Area'] !== null ? autolinker.link(String(feature.properties['Area']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                </tr>\
+                <tr>\
+                    <th scope="row">Class</th>\
+                    <td>' + (feature.properties['Class'] !== null ? autolinker.link(String(feature.properties['Class']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                </tr>\
+                <tr>\
+                    <th scope="row">Sub_Class</th>\
+                    <td>' + (feature.properties['Sub_Class'] !== null ? autolinker.link(String(feature.properties['Sub_Class']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                </tr>\
+                <tr>\
+                    <th scope="row">Remarks</th>\
+                    <td class="visible-with-data" id="Remarks">' + (feature.properties['Remarks'] !== null ? autolinker.link(String(feature.properties['Remarks']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                </tr>\
+                <tr>\
+                    <th scope="row">Barangay</th>\
+                    <td>' + (feature.properties['Barangay'] !== null ? autolinker.link(String(feature.properties['Barangay']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                </tr>\
+            </table>';
+        var content = removeEmptyRowsFromPopupContent(popupContent, feature);
+        layer.on('popupopen', function(e) {
+            addClassToPopupIfMedia(content, e.popup);
+        });
+        layer.bindPopup(content, { maxHeight: 400 });
+    }
 
         function style_TAXMAP_3_0() {
             return {
@@ -364,6 +381,33 @@
         search.style.display = "flex";
         search.style.backgroundColor="rgba(255,255,255,0.5)" 
 
+        function style_CADASTRALMAP_0_0() {
+        return { opacity: 1, color: 'rgba(255,212,0,1.0)', weight: 1.0, fill: true, fillOpacity: 1, fillColor: 'rgba(231,113,72,0.0)', interactive: true };
+        }
+        var layer_CADASTRALMAP_0 = new L.geoJson(json_CADASTRALMAP_0, { style: style_CADASTRALMAP_0_0 });
+
+        function style_TSPSLine2024_2_0() {
+        return { color: '#ba7517', weight: 2, interactive: true };
+        }
+        var layer_TSPSLine2024_2 = new L.geoJson(json_TSPSLine2024_2, { style: style_TSPSLine2024_2_0 });
+
+        function style_River_3_0() {
+            return { opacity: 1, color: 'rgba(4,44,83,1.0)', weight: 4.0, fillOpacity: 0, interactive: true };
+        }
+        var layer_River_3 = new L.geoJson(json_River_3, { style: style_River_3_0 });
+
+        function style_FloodAffectedAreas_4_0() {
+            return { opacity: 1, color: 'rgba(35,35,35,1.0)', weight: 1.0, fill: true, fillOpacity: 1, fillColor: 'rgba(17,43,221,1.0)', interactive: true };
+        }
+        var layer_FloodAffectedAreas_4 = new L.geoJson(json_FloodAffectedAreas_4, { style: style_FloodAffectedAreas_4_0 });
+
+        function style_LandslideAffectedAreas_5_0(feature) {
+            var colors = {'1':'rgba(255,230,105,1.0)','2':'rgba(255,120,23,1.0)','3':'rgba(255,0,23,1.0)'};
+            return { opacity: 1, color: 'rgba(35,35,35,1.0)', weight: 1.0, fill: true, fillOpacity: 1, fillColor: colors[String(feature.properties['Level'])] || 'rgba(78,213,41,1.0)', interactive: true };
+        }
+        var layer_LandslideAffectedAreas_5 = new L.geoJson(json_LandslideAffectedAreas_5, { style: style_LandslideAffectedAreas_5_0 });
+
+
         // Create the new button element
         var button = document.createElement("div");
         button.id = "gcd-button-control";
@@ -384,8 +428,13 @@
         var layer_BarangayColors = L.layerGroup([]);
         var overlaysTree = [
             {label: '<img src="legend/TAXMAP_3.png" /> TAX MAP', layer: layer_TAXMAP_3},
-            {label: "Barangay Colors", layer: layer_BarangayColors},
             {label: "Parcel Labels", layer: layer_ParcelLabels},
+            {label: "Barangay Colors", layer: layer_BarangayColors},
+            {label: "CADASTRAL MAP", layer: layer_CADASTRALMAP_0},
+            {label: "TSPS Line", layer: layer_TSPSLine2024_2},
+            {label: "River", layer: layer_River_3},
+            {label: "Flood Affected Areas", layer: layer_FloodAffectedAreas_4},
+            {label: "Landslide Affected Areas", layer: layer_LandslideAffectedAreas_5},
             {label: "Google Hybrid", layer: layer_GoogleHybrid_2},
             {label: "OpenStreetMap", layer: layer_OpenStreetMap_1},
             {label: "Google Satellite", layer: layer_GoogleSatellite_0},]
@@ -413,6 +462,7 @@ setTimeout(function() {
         }
     });
 
+    
     var searchControl = new L.Control.Search({
         layer: layer_TAXMAP_3,
         initial: false,
@@ -438,6 +488,38 @@ setTimeout(function() {
     });
     map.addControl(searchControl);
 
+   var MAPILLARY_TOKEN = 'MLY|28630541673224564|67d3ad81577b6fce0c7d2750a76128d7';
+    var mlyViewer = null;
+
+    function openStreetView(lat, lng) {
+        document.getElementById('streetViewModal').style.display = 'block';
+        document.getElementById('noStreetView').style.display = 'none';
+
+        fetch('https://graph.mapillary.com/images?access_token=' + MAPILLARY_TOKEN +
+            '&fields=id&closeto=' + lng + ',' + lat + '&radius=200&limit=1')
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.data && data.data.length > 0) {
+                    var imageId = data.data[0].id;
+                    if (mlyViewer) { mlyViewer.remove(); }
+                    mlyViewer = new mapillary.Viewer({
+                        accessToken: MAPILLARY_TOKEN,
+                        container: 'mly',
+                        imageId: imageId
+                    });
+                } else {
+                    document.getElementById('noStreetView').style.display = 'block';
+                }
+            })
+            .catch(function() {
+                document.getElementById('noStreetView').style.display = 'block';
+            });
+    }
+
+    document.getElementById('closeStreetView').addEventListener('click', function() {
+        document.getElementById('streetViewModal').style.display = 'none';
+    });
+
     try {
     L.control.browserPrint({
         title: 'Print Map',
@@ -446,6 +528,23 @@ setTimeout(function() {
 } catch (err) {
     console.warn('Could not initialize print control:', err);
 }
+
+var streetViewBtn = L.control({ position: 'topleft' });
+streetViewBtn.onAdd = function() {
+    var div = L.DomUtil.create('div', 'leaflet-bar');
+    div.innerHTML = '<a href="#" title="Click a spot to view street-level imagery" style="background: rgb(232, 177, 31); color: #0c2350; font-size:16px; width:26px; height:26px; display:flex; align-items:center; justify-content:center;"><i class="fa fa-street-view"></i></a>';
+    div.style.background = 'rgb(232, 177, 31)';
+    L.DomEvent.on(div, 'click', function(e) {
+        L.DomEvent.stopPropagation(e);
+        map.getContainer().style.cursor = 'crosshair';
+        map.once('click', function(clickEvent) {
+            map.getContainer().style.cursor = '';
+            openStreetView(clickEvent.latlng.lat, clickEvent.latlng.lng);
+        });
+    });
+    return div;
+};
+streetViewBtn.addTo(map);
 
     var highlightLayer = null;
 
